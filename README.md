@@ -10,6 +10,6 @@ Instructions: Modify the values between ##### Generator Parameters ##### and exe
 
 * note: Total symmetrical response is to be included shortly. 
 
-
-https://github.com/leo-fitzgerald/Power-System-Notes/blob/main/Figure_1.png?
+Example output plot:
+  https://github.com/leo-fitzgerald/Power-System-Notes/blob/main/Figure_1.png
 
