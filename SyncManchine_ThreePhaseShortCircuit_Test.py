@@ -36,7 +36,7 @@ def Isubtransient(t):
     """Calculate subtransient current."""
     return np.exp(-t/Tdss) * math.sqrt(2) * abs(Iass()) * np.cos(oemega * t)
 
-def fullsymresponse(t): ########## need to verify
+def fullsymresponse(t): ########## need to verify = incomplete / issues
     '''Calculate full symmetrical response.'''
     return math.sqrt(2)*Eass * (1/(Xd + X_tran)) +\
     ((1/(Xds+X_tran)) - (1/(Xd+X_tran))) * np.exp(-t/Tds) +\
@@ -86,7 +86,7 @@ def plot_subplots(t, Iss_time, Itransient, Isubtransient, fullsymresponse):
     plt.figure(figsize=(10, 8))
 
     # Plot all currents
-    plt.subplot(5, 1, 1)
+    plt.subplot(4, 1, 1)
     plt.plot(t, Iss_time(t))
     plt.plot(t, Itransient(t))
     plt.plot(t, Isubtransient(t))
@@ -95,32 +95,32 @@ def plot_subplots(t, Iss_time, Itransient, Isubtransient, fullsymresponse):
     # plt.show()
 
     # Subplot 1: Iss_time
-    plt.subplot(5, 1, 5)
+    plt.subplot(4, 1, 4)
     plt.plot(t, Iss_time(t),color='blue')
     plt.title("Iss_time")
     plt.legend(["Iss_time"])
     plt.xlim(0, 0.8)
 
     # Subplot 2: Itransient
-    plt.subplot(5, 1 ,3)
+    plt.subplot(4, 1 ,3)
     plt.plot(t, Itransient(t), color='orange')
     plt.title("Itransient")
     plt.legend(["Itransient"])
     plt.xlim(0, 0.8)
 
     # Subplot 3: Isubtransient
-    plt.subplot(5, 1, 2)
+    plt.subplot(4, 1, 2)
     plt.plot(t, Isubtransient(t), color='green')
     plt.title("Isubtransient")
     plt.legend(["Isubtransient"])
     plt.xlim(0, 0.8)
 
-    # Subplot 4: Full symmetrical response
-    plt.subplot(5, 1, 4)
-    plt.plot(t, fullsymresponse(t), color='orange')
-    plt.title("Full Symmetrical Response")
-    plt.legend(["Full Symmetrical Response"])
-    plt.xlim(0, 0.8)
+    # # Subplot 4: Full symmetrical response
+    # plt.subplot(5, 1, 4)
+    # plt.plot(t, fullsymresponse(t), color='orange')
+    # plt.title("Full Symmetrical Response")
+    # plt.legend(["Full Symmetrical Response"])
+    # plt.xlim(0, 0.8)
 
     plt.tight_layout()
     plt.show()
