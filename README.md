@@ -6,10 +6,12 @@ Libraries Required:
   
 Basic program to plot synchronous generator response under short circuit test.
 
-Instructions: Modify the values between ##### Generator Parameters ##### and execuite code. 
+Instructions: 
+    Modify the values between ##### Generator Parameters ##### and execuite code. 
 
-* note: Total symmetrical response is to be included shortly. 
+Note:
+    Total symmetrical response is to be included shortly. 
 
 Example output plot:
-  https://github.com/leo-fitzgerald/Power-System-Notes/blob/main/Figure_1.png
+    https://github.com/leo-fitzgerald/Power-System-Notes/blob/main/Figure_1.png
 
