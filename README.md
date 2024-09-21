@@ -6,9 +6,6 @@ Basic program to plot synchronous generator response under short circuit test.
 2) math
 3) matplotlib
 
-  
-Basic program to plot synchronous generator response under short circuit test.
-
 Instructions: 
     Modify the values between ##### Generator Parameters ##### and execuite code. 
 
