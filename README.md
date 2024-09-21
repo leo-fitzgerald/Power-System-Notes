@@ -13,5 +13,5 @@ Note:
     Total symmetrical response is to be included shortly. 
 
 Example output plot:
-    https://github.com/leo-fitzgerald/Power-System-Notes/blob/main/Figure_1.png
+   [[
 
