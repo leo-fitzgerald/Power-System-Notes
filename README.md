@@ -18,4 +18,4 @@ Run `SyncMachine_GUI.py` to launch the tkinter GUI. Modify generator parameters 
 5) Total Symmetrical Response
 
 Example Output:
-![Figure_2](screenshots/Figure_2.png)
+![Figure_2](screenshots/Figure_3.png)
