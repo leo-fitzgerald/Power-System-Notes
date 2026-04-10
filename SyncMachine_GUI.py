@@ -1,8 +1,9 @@
 # Leo Fitzgerald
-# Tkinter GUI for Synchronous Machine Three Phase Short Circuit Fault Response
-# Derived from SyncManchine_ThreePhaseShortCircuit_Test.py
+# Synchronous Machine Three Phase Short Circuit Fault Response
+# Combined calculation engine and Tkinter GUI
+# 15th September 2024 (original), updated with GUI and corrected formulae
 #
-# Original calculations from lecture notes by Dr. Brian Johnston
+# Derived from lecture notes by Dr. Brian Johnston
 # at University of Idaho Power Systems
 
 import math
@@ -16,25 +17,61 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 # --------------- Calculation functions ---------------
 
 def calc_Iass(Eass, Xdss, X_tran):
+    """Calculate subtransient current phasor: E'' / j(Xd'' + X_tran)."""
     return Eass / (complex(0, Xdss) + complex(0, X_tran))
 
+
 def calc_Ias(Eas, Xds, X_tran):
+    """Calculate transient current phasor: E' / j(Xd' + X_tran)."""
     return Eas / (complex(0, Xds) + complex(0, X_tran))
 
+
 def calc_Iss(Ea, Xd, X_tran):
+    """Calculate steady-state current phasor: E / j(Xd + X_tran)."""
     return Ea / (complex(0, Xd) + complex(0, X_tran))
 
+
+def calc_Idcoffsetmax(Eass, Xdss, X_tran):
+    """Calculate maximum DC offset current magnitude."""
+    return math.sqrt(2) * (Eass / (Xdss + X_tran))
+
+
 def Iss_time(t, Ea, Xd, X_tran, omega):
+    """Steady-state AC short-circuit current vs time."""
     Iss = calc_Iss(Ea, Xd, X_tran)
     return math.sqrt(2) * abs(Iss) * np.cos(omega * t)
 
+
 def Itransient(t, Eas, Xds, X_tran, omega, Tds):
+    """Transient AC short-circuit current component vs time."""
     Ias = calc_Ias(Eas, Xds, X_tran)
     return np.exp(-t / Tds) * math.sqrt(2) * abs(Ias) * np.cos(omega * t)
 
+
 def Isubtransient(t, Eass, Xdss, X_tran, omega, Tdss):
+    """Subtransient AC short-circuit current component vs time."""
     Iass = calc_Iass(Eass, Xdss, X_tran)
     return np.exp(-t / Tdss) * math.sqrt(2) * abs(Iass) * np.cos(omega * t)
+
+
+def fullsymresponse(t, E, Xd, Xds, Xdss, X_tran, Tds, Tdss, omega):
+    """Total symmetrical (AC) short-circuit current.
+
+    Formula (standard textbook form):
+        i_sym(t) = sqrt(2) * E * [ 1/(Xd  + X_tran)
+            + (1/(Xd' + X_tran) - 1/(Xd  + X_tran)) * exp(-t/Td')
+            + (1/(Xd''+ X_tran) - 1/(Xd' + X_tran)) * exp(-t/Td'')
+        ] * cos(omega * t)
+
+    At t=0 the envelope equals sqrt(2)*E/(Xd''+X_tran)  (subtransient).
+    As t -> inf the envelope decays to sqrt(2)*E/(Xd+X_tran)  (steady-state).
+    """
+    envelope = (
+        1.0 / (Xd + X_tran)
+        + (1.0 / (Xds + X_tran) - 1.0 / (Xd + X_tran)) * np.exp(-t / Tds)
+        + (1.0 / (Xdss + X_tran) - 1.0 / (Xds + X_tran)) * np.exp(-t / Tdss)
+    )
+    return math.sqrt(2) * E * envelope * np.cos(omega * t)
 
 
 # --------------- GUI Application ---------------
@@ -80,8 +117,8 @@ class SyncMachineGUI:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Synchronous Machine – Three-Phase Short Circuit")
-        self.root.minsize(1100, 700)
+        self.root.title("Synchronous Machine \u2013 Three-Phase Short Circuit")
+        self.root.minsize(1100, 750)
 
         self.entries = {}
         self._build_ui()
@@ -140,7 +177,7 @@ class SyncMachineGUI:
         right = ttk.Frame(pane, padding=4)
         pane.add(right, weight=1)
 
-        self.fig = Figure(figsize=(9, 7), dpi=100)
+        self.fig = Figure(figsize=(9, 8), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.fig, master=right)
         toolbar = NavigationToolbar2Tk(self.canvas, right)
         toolbar.update()
@@ -196,64 +233,88 @@ class SyncMachineGUI:
         X_tran = params["X_tran"]
         Tdss = params["Tdss"]
         Tds = params["Tds"]
+        Ta = params["Ta"]
+        S_rated = params["S_rated"]
+        VLL = params["VLL"]
 
         # EMF values (all equal to terminal voltage for this model)
-        Eass = Eas = Ea = V_term
+        E = V_term
+
+        # Derived quantities
+        X2 = Xdss
+        L2 = (X2 / omega) * ((VLL ** 2) / S_rated)
+        Ra = L2 / Ta
+
+        # Base current
+        Ibase = (S_rated * 1e6) / (math.sqrt(3) * VLL * 1e3)
 
         # Time vector
         t = np.arange(0, 2, 0.00001)
 
-        # Compute currents (per-unit)
-        iss = Iss_time(t, Ea, Xd, X_tran, omega)
-        itrans = Itransient(t, Eas, Xds, X_tran, omega, Tds)
-        isubtrans = Isubtransient(t, Eass, Xdss, X_tran, omega, Tdss)
+        # Compute individual current components (per-unit)
+        iss = Iss_time(t, E, Xd, X_tran, omega)
+        itrans = Itransient(t, E, Xds, X_tran, omega, Tds)
+        isubtrans = Isubtransient(t, E, Xdss, X_tran, omega, Tdss)
 
-        # Base current
-        S_rated = params["S_rated"]
-        VLL = params["VLL"]
-        Ibase = (S_rated * 1e6) / (math.sqrt(3) * VLL * 1e3)
+        # Total symmetrical (AC) response
+        isym = fullsymresponse(t, E, Xd, Xds, Xdss, X_tran, Tds, Tdss, omega)
 
-        # Update info label
-        Iss_mag = abs(calc_Iss(Ea, Xd, X_tran))
-        Ias_mag = abs(calc_Ias(Eas, Xds, X_tran))
-        Iass_mag = abs(calc_Iass(Eass, Xdss, X_tran))
+        # Update info label with computed magnitudes
+        Iss_mag = abs(calc_Iss(E, Xd, X_tran))
+        Ias_mag = abs(calc_Ias(E, Xds, X_tran))
+        Iass_mag = abs(calc_Iass(E, Xdss, X_tran))
+        Idc_max = calc_Idcoffsetmax(E, Xdss, X_tran)
         self.info_var.set(
-            f"Ibase = {Ibase:,.1f} A\n"
-            f"|Iss|  = {Iss_mag:.4f} pu  ({Iss_mag * Ibase:,.1f} A)\n"
-            f"|Ias'| = {Ias_mag:.4f} pu  ({Ias_mag * Ibase:,.1f} A)\n"
-            f"|Iass''| = {Iass_mag:.4f} pu  ({Iass_mag * Ibase:,.1f} A)"
+            f"Ibase  = {Ibase:,.1f} A\n"
+            f"Ra     = {Ra:.6f} pu\n"
+            f"\n"
+            f"|Iss|   = {Iss_mag:.4f} pu  ({Iss_mag * Ibase:,.1f} A)\n"
+            f"|Ias'|  = {Ias_mag:.4f} pu  ({Ias_mag * Ibase:,.1f} A)\n"
+            f"|Iass''| = {Iass_mag:.4f} pu  ({Iass_mag * Ibase:,.1f} A)\n"
+            f"Idc_max = {Idc_max:.4f} pu  ({Idc_max * Ibase:,.1f} A)"
         )
 
         # ---- Draw plots ----
         self.fig.clear()
 
-        ax1 = self.fig.add_subplot(4, 1, 1)
+        # 1) All individual components overlaid
+        ax1 = self.fig.add_subplot(5, 1, 1)
         ax1.plot(t, iss, label="Iss (steady-state)")
         ax1.plot(t, itrans, label="Itransient")
         ax1.plot(t, isubtrans, label="Isubtransient")
         ax1.legend(loc="upper right", fontsize=8)
         ax1.set_xlim(0, 0.8)
         ax1.set_ylabel("Current (pu)")
-        ax1.set_title("All Components", fontsize=10)
+        ax1.set_title("Individual Components", fontsize=10)
 
-        ax2 = self.fig.add_subplot(4, 1, 2)
+        # 2) Isubtransient
+        ax2 = self.fig.add_subplot(5, 1, 2)
         ax2.plot(t, isubtrans, color="green")
         ax2.set_xlim(0, 0.8)
         ax2.set_ylabel("Current (pu)")
         ax2.set_title("Isubtransient", fontsize=10)
 
-        ax3 = self.fig.add_subplot(4, 1, 3)
+        # 3) Itransient
+        ax3 = self.fig.add_subplot(5, 1, 3)
         ax3.plot(t, itrans, color="orange")
         ax3.set_xlim(0, 0.8)
         ax3.set_ylabel("Current (pu)")
         ax3.set_title("Itransient", fontsize=10)
 
-        ax4 = self.fig.add_subplot(4, 1, 4)
+        # 4) Iss (steady-state)
+        ax4 = self.fig.add_subplot(5, 1, 4)
         ax4.plot(t, iss, color="blue")
         ax4.set_xlim(0, 0.8)
-        ax4.set_xlabel("Time (s)")
         ax4.set_ylabel("Current (pu)")
         ax4.set_title("Iss (steady-state)", fontsize=10)
+
+        # 5) Total symmetrical response
+        ax5 = self.fig.add_subplot(5, 1, 5)
+        ax5.plot(t, isym, color="red")
+        ax5.set_xlim(0, 0.8)
+        ax5.set_xlabel("Time (s)")
+        ax5.set_ylabel("Current (pu)")
+        ax5.set_title("Total Symmetrical Response", fontsize=10)
 
         self.fig.tight_layout()
         self.canvas.draw()
