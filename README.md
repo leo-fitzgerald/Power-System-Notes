@@ -1,15 +1,21 @@
-# Generator Short Circuit Current Test Graphhing 
+# Generator Short Circuit Current Test Graphing
 Basic program to plot synchronous generator response under short circuit test.
 
 ## Libraries:
 1) numpy
 2) math
 3) matplotlib
+4) tkinter
 
-## Instructions: 
-Modify the values between ##### Generator Parameters ##### and execuite code. 
+## Instructions:
+Run `SyncMachine_GUI.py` to launch the tkinter GUI. Modify generator parameters in the left panel and click **Plot** to update the graphs.
 
-## Note: Total symmetrical response is to be included. 
+## Plots:
+1) Individual Components (overlay of steady-state, transient, subtransient)
+2) Isubtransient
+3) Itransient
+4) Iss (steady-state)
+5) Total Symmetrical Response
 
 Example Output:
-![Figure_1](https://github.com/user-attachments/assets/d7c87faa-a73f-487a-85f7-43868d99e9cc)
+![Figure_2](screenshots/Figure_2.png)
