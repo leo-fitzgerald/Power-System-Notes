@@ -286,6 +286,7 @@ class SyncMachineGUI:
         ax1.set_xlim(0, 0.8)
         ax1.set_ylabel("Current (pu)")
         ax1.set_title("Individual Components", fontsize=10)
+        ax1.grid(True, linestyle="--", linewidth=0.5)
 
         # 2) Isubtransient
         ax2 = self.fig.add_subplot(5, 1, 2)
@@ -293,6 +294,7 @@ class SyncMachineGUI:
         ax2.set_xlim(0, 0.8)
         ax2.set_ylabel("Current (pu)")
         ax2.set_title("Isubtransient", fontsize=10)
+        ax2.grid(True, linestyle="--", linewidth=0.5)
 
         # 3) Itransient
         ax3 = self.fig.add_subplot(5, 1, 3)
@@ -300,6 +302,7 @@ class SyncMachineGUI:
         ax3.set_xlim(0, 0.8)
         ax3.set_ylabel("Current (pu)")
         ax3.set_title("Itransient", fontsize=10)
+        ax3.grid(True, linestyle="--", linewidth=0.5)
 
         # 4) Iss (steady-state)
         ax4 = self.fig.add_subplot(5, 1, 4)
@@ -307,6 +310,7 @@ class SyncMachineGUI:
         ax4.set_xlim(0, 0.8)
         ax4.set_ylabel("Current (pu)")
         ax4.set_title("Iss (steady-state)", fontsize=10)
+        ax4.grid(True, linestyle="--", linewidth=0.5)
 
         # 5) Total symmetrical response
         ax5 = self.fig.add_subplot(5, 1, 5)
@@ -315,6 +319,7 @@ class SyncMachineGUI:
         ax5.set_xlabel("Time (s)")
         ax5.set_ylabel("Current (pu)")
         ax5.set_title("Total Symmetrical Response", fontsize=10)
+        ax5.grid(True, linestyle="--", linewidth=0.5)
 
         self.fig.tight_layout()
         self.canvas.draw()
